@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type UserBasic struct {
+type User struct {
 	Identity   string `bson:"_id"`
 	Account    string `bson:"account"`
 	Password   string `bson:"password"`
@@ -18,13 +18,13 @@ type UserBasic struct {
 	UpdateTime int64  `bson:"update_time"`
 }
 
-func (UserBasic) CollectionName() string {
-	return "user_basic"
+func (User) CollectionName() string {
+	return "t_user"
 }
 
-func GetUserBasicByAccountAndPassword(account, password string) (*UserBasic, error) {
-	ub := new(UserBasic)
-	err := Mongo.Collection(UserBasic{}.CollectionName()).
+func GetUserBasicByAccountAndPassword(account, password string) (*User, error) {
+	ub := new(User)
+	err := Mongo.Collection(User{}.CollectionName()).
 		FindOne(context.Background(), bson.D{{"account", account}, {"password", password}}).
 		Decode(ub)
 	return ub, err
