@@ -23,7 +23,7 @@ func TestFindOne(t *testing.T) {
 		t.Fatal(err)
 	}
 	db := client.Database("im")
-	ub := new(models.UserBasic)
+	ub := new(models.User)
 	err = db.Collection("user_basic").FindOne(context.Background(), bson.D{}).Decode(ub)
 	if err != nil {
 		t.Fatal(err)

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type User struct {
@@ -22,10 +23,20 @@ func (User) CollectionName() string {
 	return "t_user"
 }
 
-func GetUserBasicByAccountAndPassword(account, password string) (*User, error) {
+func GetUserByAccountAndPassword(account, password string) (*User, error) {
 	ub := new(User)
 	err := Mongo.Collection(User{}.CollectionName()).
 		FindOne(context.Background(), bson.D{{"account", account}, {"password", password}}).
 		Decode(ub)
+	return ub, err
+}
+
+// 根据_id从MongoDB中返回User用户信息
+
+func GetUserByIdentity(identity primitive.ObjectID) (*User, error) {
+	ub := new(User)
+	err := Mongo.Collection(User{}.CollectionName()).
+		FindOne(context.Background(), bson.D{{"_id", identity}}).
+		Decode(ub) //把根据identity从数据库中查询到的User对象，返回到ub中，并return
 	return ub, err
 }
