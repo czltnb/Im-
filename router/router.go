@@ -12,6 +12,9 @@ func Router() *gin.Engine {
 	//用户登录
 	r.POST("/login", service.Login)
 
+	//发送验证码
+	r.POST("/send/code", service.SendCode)
+
 	//创建一个以/user为前缀的路由组,该组下所有路由的路径，都会加上该前缀
 	//middlewares.AuthCheck()表示该组的专属中间件，会作用于该组下的所有路由。
 	auth := r.Group("/user", middlewares.AuthCheck())

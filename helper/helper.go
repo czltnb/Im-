@@ -2,9 +2,14 @@ package helper
 
 import (
 	"crypto/md5"
+	"crypto/tls"
 	"fmt"
+	"im/define"
+	"net/smtp"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/jordan-wright/email"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -63,4 +68,19 @@ func AnalyseToken(tokenString string) (*UserClaims, error) {
 		return nil, fmt.Errorf("analyse Token Error:%v", err)
 	}
 	return userClaim, nil
+}
+
+// 发送验证码,用于用户注册
+
+func SendCode(toUserEmail, code string) error {
+	e := email.NewEmail()
+	e.From = "Get <2767205408@qq.com>"
+	e.To = []string{toUserEmail}
+	e.Subject = "验证码已发送，请查收"
+	e.HTML = []byte("您的验证码: <b>" + code + "</b>")
+	return e.SendWithTLS("smtp.qq.com:465", //指定发送邮件的SMTP服务器地址和端口，TLS一般用587
+		smtp.PlainAuth("", "2767205408@qq.com", define.MailPassword, "smtp.qq.com"), //配置邮件发送的身份验证信息，确保你有权限使用该发件人邮箱发送邮件
+		&tls.Config{InsecureSkipVerify: true, ServerName: "smtp.qq.com"})            //配置TLS加密传输的规则（因为SMTP发送邮件需要加密以保证安全）
+	//InsecureSkipVerify表示跳过TLS证书的验证，ServerName指定TLS握手时验证的服务器名称(必须与SMTP服务器域名一致)
+
 }

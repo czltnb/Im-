@@ -5,6 +5,7 @@ import (
 	"im/models"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -77,4 +78,54 @@ func UserDetail(c *gin.Context) {
 		"msg":  "数据查询成功",
 		"data": user,
 	})
+}
+
+func SendCode(c *gin.Context) {
+	//要发送验证码的邮箱
+	email := c.PostForm("email")
+	if email == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "目标邮箱不能为空",
+		})
+		return
+	}
+
+	//查询目标邮箱在数据库中，是否已经被注册
+	cnt, err := models.GetUserByEmail(email)
+	if err != nil {
+		log.Println("[DB数据库 ERROR]:%v\n", err)
+		return
+	}
+
+	if cnt > 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "该邮箱已经被注册",
+		})
+		return
+	}
+
+	err = helper.SendCode(email, "666666")
+	if err != nil {
+		// 判断错误是否为"short response"相关的误报（根据实际错误信息调整关键字）
+		if strings.Contains(err.Error(), "short response") {
+			// 忽略该误报，视为发送成功（打印警告日志便于排查）
+			log.Printf("[WARN] 邮件发送成功但存在协议兼容警告: %v\n", err)
+		} else {
+			// 处理真实错误（如授权失败、网络问题等）
+			log.Printf("[ERROR] 发送验证码失败: %v\n", err)
+			c.JSON(http.StatusOK, gin.H{
+				"code": -1,
+				"msg":  "系统错误，发送验证码失败：" + err.Error(),
+			})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "发送邮箱验证码成功",
+	})
+
 }

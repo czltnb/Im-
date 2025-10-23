@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//类似token拦截器
+
 /**
 身份认证中间件，验证客户端请求中的Token的合法性，确保携带有效Token的用户才能访问受保护的接口
 */
